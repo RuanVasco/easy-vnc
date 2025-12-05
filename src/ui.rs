@@ -1,5 +1,5 @@
 use gtk4::glib::BoxedAnyObject;
-use gtk4::{Align, Label, ListItem, ListView, Orientation, PolicyType, SignalListItemFactory, SingleSelection, gio, prelude::*};
+use gtk4::{Align, Label, ListItem, ListView, Orientation, PolicyType, SignalListItemFactory, NoSelection, gio, prelude::*};
 use gtk4::{Application, ApplicationWindow, Button, ScrolledWindow, Box};
 
 use crate::config::Entries;
@@ -14,7 +14,7 @@ pub fn build(app: &Application) {
         store.append(&obj);
     }
 
-    let selection_model = SingleSelection::new(Some(store));
+    let selection_model = NoSelection::new(Some(store));
 
     let factory = SignalListItemFactory::new();
 
@@ -79,6 +79,7 @@ pub fn build(app: &Application) {
         .title("Easy VNC")
         .default_width(350)
         .default_height(500)
+        .resizable(false)
         .child(&scrolled_window)
         .build();
 
