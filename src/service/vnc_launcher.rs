@@ -8,12 +8,10 @@ impl VncLauncher {
     pub fn launch(connection: &mut VncConnection) {
         let session_type = env::var("XDG_SESSION_TYPE").unwrap_or_default();
         let target = connection.address();
-        let status;
-
-        if session_type.to_lowercase().contains("wayland") {
-            status = Command::new("wayvnc").arg("-c").arg(&target).spawn();
+        let status = if session_type.to_lowercase().contains("wayland") {
+            Command::new("wayvnc").arg("-c").arg(&target).spawn()
         } else {
-            status = Command::new("x11vnc")
+            Command::new("x11vnc")
                 .arg("-connect")
                 .arg(&target)
                 .arg("-display")
@@ -22,8 +20,8 @@ impl VncLauncher {
                 .arg("10")
                 .arg("-once")
                 .arg("-nopw")
-                .spawn();
-        }
+                .spawn()
+        };
 
         match status {
             Ok(_) => {

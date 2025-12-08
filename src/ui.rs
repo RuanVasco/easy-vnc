@@ -1,3 +1,6 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use gtk4::glib::BoxedAnyObject;
 use gtk4::{
     Align, Label, ListItem, ListView, NoSelection, Orientation, PolicyType, SignalListItemFactory,
@@ -60,11 +63,11 @@ pub fn build(app: &Application) {
 
         label.set_label(&format!("{} ({})", vnc_conn.label, vnc_conn.ip));
 
-        let conn_clone = vnc_conn.clone();
+        let conn_wrapper = Rc::new(RefCell::new(vnc_conn.clone()));
 
         button.connect_clicked(move |_| {
-            let mut temp_conn = conn_clone.clone();
-            VncLauncher::launch(&mut temp_conn);
+            let mut conn_ref = conn_wrapper.borrow_mut();
+            VncLauncher::launch(&mut conn_ref);
         });
     });
 
