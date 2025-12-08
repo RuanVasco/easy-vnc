@@ -19,6 +19,7 @@ impl VncLauncher {
             status = Command::new("x11vnc")
                 .arg("-connect")
                 .arg(&target)
+                .arg("-display").arg(":0")
                 .arg("-ncache").arg("10")
                 .arg("-once")
                 .arg("-nopw")
