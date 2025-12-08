@@ -1,5 +1,5 @@
-use serde::Deserialize;
 use directories::ProjectDirs;
+use serde::Deserialize;
 use std::fs;
 use std::path::PathBuf;
 
@@ -37,11 +37,13 @@ impl Entries {
 }
 
 fn read_file(path: PathBuf) -> Vec<VncConnection> {
-    if let Ok(content) = fs::read_to_string(&path) {
-        if let Ok(list) = quick_xml::de::from_str::<Entries>(&content) {
-            return list.entries;
-        }
-    }
+    let Ok(content) = fs::read_to_string(&path) else {
+        return vec![];
+    };
 
-    vec![]
+    let Ok(list) = quick_xml::de::from_str::<Entries>(&content) else {
+        return vec![];
+    };
+
+    list.entries
 }
