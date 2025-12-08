@@ -20,12 +20,13 @@ impl VncLauncher {
                 .arg("-connect")
                 .arg(&target)
                 .arg("-ncache").arg("10")
-                .arg("-once")           
+                .arg("-once")
+                .arg("-nopw")
                 .spawn();
         }
            
         match status {
-            Ok(_) => println!("Cliente VNC iniciado com sucesso!"),
+            Ok(_) => {},
             Err(e) => eprintln!("Falha ao executar o comando: {}", e),
         }
     }
