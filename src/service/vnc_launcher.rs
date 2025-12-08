@@ -22,6 +22,7 @@ impl VncLauncher {
                 .arg("-display").arg(":0")
                 .arg("-ncache").arg("10")
                 .arg("-once")
+                .arg("-desktop")
                 .arg("-nopw")
                 .spawn();
         }
