@@ -13,7 +13,7 @@ pub struct Entries {
 
 impl Entries {
     pub fn load() -> Vec<VncConnection> {
-        if let Some(proj_dirs) = ProjectDirs::from("com", "github", "easy-vnc") {
+        if let Some(proj_dirs) = ProjectDirs::from("com", "github", "easy-remote") {
             let config_dir = proj_dirs.config_dir();
             let config_file = config_dir.join("entries.xml");
 
@@ -22,7 +22,7 @@ impl Entries {
             }
         }
 
-        let system_file = PathBuf::from("/etc/easy-vnc/entries.xml");
+        let system_file = PathBuf::from("/etc/easy-remote/entries.xml");
         if system_file.exists() {
             return read_file(system_file);
         }
