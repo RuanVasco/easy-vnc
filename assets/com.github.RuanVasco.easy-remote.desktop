@@ -2,7 +2,7 @@
 Version=1.0
 Type=Application
 Name=Easy Remote
-Comment=Conexão remota simplificada para suporte técnico
+Comment=Open-source 'Single Click' remote support client
 Exec=easy-remote
 Icon=com.github.RuanVasco.easy-remote
 Terminal=false
