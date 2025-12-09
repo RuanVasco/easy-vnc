@@ -6,7 +6,7 @@ mod service;
 mod ui;
 mod config;
 
-const APP_ID: &str = "com.github.RuanVasco.easy-vnc";
+const APP_ID: &str = "com.github.RuanVasco.easy-remote";
 
 fn main() {
     let app = Application::builder()
