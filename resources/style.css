@@ -1,0 +1,23 @@
+.status-bar {
+    padding: 4px 8px;
+    font-weight: bold;
+    color: white;
+    font-size: 11px;
+}
+
+.status-ready {
+    background-color: #3584e4;
+}
+
+.status-loading {
+    background-color: #e5a50a;
+    color: black;
+}
+
+.status-success {
+    background-color: #2ec27e;
+}
+
+.status-error {
+    background-color: #e01b24;
+}
