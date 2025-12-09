@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Ruan <ruanvasconcelos898@gmail.com>"]
 edition = "2024"
 license = "GPL-3.0-only"
-description = "Gerenciador de conexões VNC simplificado para suporte técnico."
+description = "Open-source 'Single Click' remote support client for Linux."
 
 [dependencies]
 directories = "6.0.0"
