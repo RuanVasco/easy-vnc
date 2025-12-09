@@ -141,7 +141,7 @@ pub fn build(app: &Application) {
 
     let window = ApplicationWindow::builder()
         .application(app)
-        .title("Easy VNC")
+        .title("Easy Remote")
         .default_width(350)
         .default_height(500)
         .resizable(false)
