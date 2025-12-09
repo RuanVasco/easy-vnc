@@ -1,5 +1,5 @@
 [package]
-name = "easy-vnc"
+name = "easy-remote"
 version = "0.1.0"
 authors = ["Ruan <ruanvasconcelos898@gmail.com>"]
 edition = "2024"
@@ -20,12 +20,12 @@ copyright = "2025, Ruan Vasco"
 depends = "$auto, x11vnc, wayvnc, libgtk-4-1"
 
 assets = [
-    ["target/release/easy-vnc", "usr/bin/", "755"],
-    ["assets/com.github.RuanVasco.easy-vnc.desktop", "usr/share/applications/", "644"],
-    ["assets/com.github.RuanVasco.easy-vnc.svg", "usr/share/icons/hicolor/scalable/apps/", "644"],
-    ["assets/entries.xml", "etc/easy-vnc/entries.xml", "644"]
+    ["target/release/easy-remote", "usr/bin/", "755"],
+    ["assets/com.github.RuanVasco.easy-remote.desktop", "usr/share/applications/", "644"],
+    ["assets/com.github.RuanVasco.easy-remote.svg", "usr/share/icons/hicolor/scalable/apps/", "644"],
+    ["assets/entries.xml", "etc/easy-remote/entries.xml", "644"]
 ]
 
 conf-files = [
-    "/etc/easy-vnc/entries.xml"
+    "/etc/easy-remote/entries.xml"
 ]
