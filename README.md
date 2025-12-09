@@ -1,13 +1,13 @@
-# Easy VNC
+# Easy Remote
 
 ![Status](https://img.shields.io/badge/Status-Active-success)
 ![Language](https://img.shields.io/badge/Rust-2021-orange)
 ![GUI](https://img.shields.io/badge/GTK-4.0-blue)
 ![License](https://img.shields.io/badge/License-GPLv3-green)
 
-**Easy VNC** is a simplified remote connection manager, developed in Rust with GTK4.
+**Easy Remote** is a simplified remote connection manager, developed in Rust with GTK4.
 
-The main goal is to facilitate technical support in corporate Linux environments. Unlike traditional VNC viewers, Easy VNC focuses on **Reverse Connection**: the user clicks on the technician's name and the computer "sends" the screen to support.
+The main goal is to facilitate technical support in corporate Linux environments. Unlike traditional VNC viewers, Easy Remote focuses on **Reverse Connection**: the user clicks on the technician's name and the computer "sends" the screen to support.
 
 ## Features
 
@@ -23,7 +23,7 @@ The main goal is to facilitate technical support in corporate Linux environments
 
 ### Ubuntu / Debian / Mint
 
-Download the latest `.deb` package from the [Releases](https://github.com/RuanVasco/easy-vnc/releases) tab and install:
+Download the latest `.deb` package from the [Releases](https://github.com/RuanVasco/easy-remote/releases) tab and install:
 
 ```bash
-sudo apt install ./easy-vnc_0.1.0_amd64.deb
+sudo apt install ./easy-remote_0.1.0_amd64.deb
