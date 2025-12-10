@@ -114,6 +114,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "easy-tech"
+version = "0.1.0"
+dependencies = [
+ "gtk4",
+ "libadwaita",
+]
+
+[[package]]
 name = "equivalent"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"

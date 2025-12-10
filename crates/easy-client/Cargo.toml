@@ -21,9 +21,9 @@ depends = "$auto, x11vnc, wayvnc, libgtk-4-1"
 
 assets = [
     ["target/release/easy-client", "usr/bin/easy-remote-client", "755"],
-    ["assets/com.github.RuanVasco.easy-remote.desktop", "usr/share/applications/", "644"],
-    ["assets/com.github.RuanVasco.easy-remote.svg", "usr/share/icons/hicolor/scalable/apps/", "644"],
-    ["assets/entries.xml", "etc/easy-remote/entries.xml", "644"]
+    ["assets/com.github.RuanVasco.easy-client.desktop", "usr/share/applications/", "644"],
+    ["assets/com.github.RuanVasco.easy-client.svg", "usr/share/icons/hicolor/scalable/apps/", "644"],
+    ["assets/entries.xml", "etc/easy-remote/client/entries.xml", "644"]
 ]
 
 conf-files = [
