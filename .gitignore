@@ -1,2 +1,7 @@
 /target
-.github\
+.github/
+*.pkg.tar.zst
+*.pkg.tar.xz
+pkg/
+easy-remote/ 
+easy-remote-*.tar.gz

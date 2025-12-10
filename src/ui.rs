@@ -200,10 +200,11 @@ pub fn build(app: &Application) {
                     });
                 }
                 Err(e) => {
-                    status_click.set_label(&format!(
-                        "<span foreground='red'>Erro ao iniciar: {}</span>",
-                        e
-                    ));
+                    update_status(
+                        &status_click,
+                        &format!("Erro ao iniciar: {}", e),
+                        "status-error",
+                    );
                 }
             }
         });
