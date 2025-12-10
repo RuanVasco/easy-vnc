@@ -2,6 +2,5 @@
 resolver = "2"
 
 members = [
-    "crates/easy-client", "crates/easy-tech",
-    # "crates/easy-core",  
+    "crates/easy-client", "crates/easy-core", "crates/easy-tech",
 ]

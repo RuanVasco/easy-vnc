@@ -114,6 +114,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "easy-core"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "easy-tech"
 version = "0.1.0"
 dependencies = [

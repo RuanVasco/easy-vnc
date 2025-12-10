@@ -10,26 +10,32 @@ depends=('gtk4' 'libadwaita' 'glib2' 'x11vnc' 'wayvnc')
 makedepends=('cargo' 'git')
 source=("git+https://github.com/RuanVasco/easy-remote.git#branch=main")
 md5sums=('SKIP')
-backup=('etc/easy-remote/entries.xml') 
+
+backup=('etc/easy-remote/client/entries.xml') 
 
 options=('!lto')
 
 prepare() {
-    cd "$pkgname"
+    cd "easy-remote"
     cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
 }
 
 build() {
-    cd "$pkgname"
-    cargo build --release --frozen --all-features
+    cd "easy-remote"
+    cargo build --release --frozen --all-features -p easy-client
 }
 
 package() {
-    cd "$pkgname"
-    install -Dm755 "target/release/easy-remote" "$pkgdir/usr/bin/easy-remote"
-    install -Dm644 "assets/com.github.RuanVasco.easy-remote.desktop" \
-        "$pkgdir/usr/share/applications/com.github.RuanVasco.easy-remote.desktop"
-    install -Dm644 "assets/com.github.RuanVasco.easy-remote.svg" \
-        "$pkgdir/usr/share/icons/hicolor/scalable/apps/com.github.RuanVasco.easy-remote.svg"
-    install -Dm644 "assets/entries.xml" "$pkgdir/etc/easy-remote/entries.xml"
+    cd "easy-remote"
+
+    install -Dm755 "target/release/easy-client" "$pkgdir/usr/bin/easy-remote-client"
+
+    install -Dm644 "crates/easy-client/assets/com.github.RuanVasco.easy-client.desktop" \
+        "$pkgdir/usr/share/applications/com.github.RuanVasco.easy-client.desktop"
+
+    install -Dm644 "crates/easy-client/assets/com.github.RuanVasco.easy-client.svg" \
+        "$pkgdir/usr/share/icons/hicolor/scalable/apps/com.github.RuanVasco.easy-client.svg"
+
+    install -Dm644 "crates/easy-client/assets/entries.xml" \
+        "$pkgdir/etc/easy-remote/client/entries.xml"
 }
