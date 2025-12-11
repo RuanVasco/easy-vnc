@@ -38,3 +38,6 @@ assets = [
 conf-files = [
     "/etc/easy-remote/client/entries.xml"
 ]
+
+[build-dependencies]
+winres = "0.1"

@@ -1,7 +1,7 @@
 # Easy Remote
 
 ![Status](https://img.shields.io/badge/Status-Active-success)
-![Language](https://img.shields.io/badge/Rust-2021-orange)
+![Language](https://img.shields.io/badge/Rust-2024-orange)
 ![GUI](https://img.shields.io/badge/GTK-4.0-blue)
 ![License](https://img.shields.io/badge/License-GPLv3-green)
 
@@ -27,3 +27,4 @@ Download the latest `.deb` package from the [Releases](https://github.com/RuanVa
 
 ```bash
 sudo apt install ./easy-remote_0.1.0_amd64.deb
+```
