@@ -1,5 +1,7 @@
+use super::VncError;
+
 pub enum VncEvent {
     Log(String),
-    ConnectionError(String),
+    ConnectionError(VncError),
     Finished,
 }

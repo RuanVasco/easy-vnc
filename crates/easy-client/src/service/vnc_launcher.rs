@@ -1,4 +1,4 @@
-use crate::model::VncConnection;
+use easy_core::model::VncConnection;
 use std::process::{Child, Command, Stdio};
 use std::{env, io};
 

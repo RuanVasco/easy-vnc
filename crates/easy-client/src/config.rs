@@ -1,9 +1,8 @@
 use directories::ProjectDirs;
+use easy_core::model::VncConnection;
 use serde::Deserialize;
 use std::fs;
 use std::path::PathBuf;
-
-use crate::model::vnc_connection::VncConnection;
 
 #[derive(Debug, Deserialize)]
 pub struct Entries {

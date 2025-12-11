@@ -12,14 +12,34 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use crate::config::Entries;
-use crate::model::{Error, VncConnection, VncEvent};
 use crate::service::vnc_launcher::VncLauncher;
+use easy_core::model::{VncError, VncEvent};
 
 use std::io::{BufRead, BufReader};
 
+pub struct LinuxApp {
+    app: Application,
+}
+
+impl LinuxApp {
+    pub fn new() -> Self {
+        let app = Application::builder()
+            .application_id("com.github.RuanVasco.easy-remote.client")
+            .build();
+
+        app.connect_activate(build_ui);
+
+        Self { app }
+    }
+
+    pub fn run(&self) {
+        self.app.run();
+    }
+}
+
 fn load_css() {
     let provider = CssProvider::new();
-    provider.load_from_data(include_str!("../resources/style.css"));
+    provider.load_from_data(include_str!("../../resources/style.css"));
 
     if let Some(display) = gdk::Display::default() {
         style_context_add_provider_for_display(
@@ -43,7 +63,7 @@ fn update_status(label: &Label, text: &str, css_class: &str) {
     label.add_css_class(css_class);
 }
 
-pub fn build(app: &Application) {
+fn build_ui(app: &Application) {
     load_css();
 
     let store = gio::ListStore::new::<BoxedAnyObject>();
@@ -103,7 +123,7 @@ pub fn build(app: &Application) {
         let button = hbox.last_child().unwrap().downcast::<Button>().unwrap();
 
         let entry = item.item().and_downcast::<BoxedAnyObject>().unwrap();
-        let vnc_conn = entry.borrow::<VncConnection>();
+        let vnc_conn = entry.borrow::<easy_core::model::VncConnection>();
 
         label.set_label(&format!("{} ({})", vnc_conn.label, vnc_conn.ip));
 
@@ -117,7 +137,6 @@ pub fn build(app: &Application) {
 
         button.connect_clicked(move |_| {
             let mut conn_ref = conn_wrapper.borrow_mut();
-
             let (sender, receiver) = async_channel::unbounded::<VncEvent>();
 
             let btn = btn_ui.clone();
@@ -127,7 +146,7 @@ pub fn build(app: &Application) {
                 while let Ok(msg) = receiver.recv().await {
                     match msg {
                         VncEvent::ConnectionError(error) => {
-                            update_status(&lbl, &error, "status-error");
+                            update_status(&lbl, &error.user_message(), "status-error");
                             btn.set_sensitive(true);
                             btn.set_label("Conectar");
                         }
@@ -135,7 +154,9 @@ pub fn build(app: &Application) {
                         VncEvent::Finished => {
                             btn.set_sensitive(true);
                             btn.set_label("Conectar");
-                            update_status(&lbl, "Ready.", "status-ready");
+                            if !lbl.has_css_class("status-error") {
+                                update_status(&lbl, "Disconnected. Ready.", "status-ready");
+                            }
                         }
                     }
                 }
@@ -151,17 +172,16 @@ pub fn build(app: &Application) {
                 Ok(mut child) => {
                     button_click.set_sensitive(false);
                     button_click.set_label("Conectando...");
-                    update_status(&status_click, "Connection active.", "status-loading");
+                    update_status(&status_click, "Connection active.", "status-success");
 
                     if let Some(stderr) = child.stderr.take() {
                         let sender_log = sender.clone();
                         thread::spawn(move || {
                             let reader = BufReader::new(stderr);
                             for l in reader.lines().map_while(Result::ok) {
-                                if let Some(error_enum) = Error::from_log(&l) {
-                                    let _ = sender_log.send_blocking(VncEvent::ConnectionError(
-                                        error_enum.user_message(),
-                                    ));
+                                if let Some(error_enum) = VncError::from_log(&l) {
+                                    let _ = sender_log
+                                        .send_blocking(VncEvent::ConnectionError(error_enum));
                                 } else {
                                     let _ = sender_log.send_blocking(VncEvent::Log(l));
                                 }
@@ -185,12 +205,11 @@ pub fn build(app: &Application) {
                                         let _ = child.wait();
 
                                         let _ = sender.send_blocking(VncEvent::ConnectionError(
-                                            "Tempo esgotado (60s). Tente novamente.".into(),
+                                            VncError::Timeout,
                                         ));
                                         let _ = sender.send_blocking(VncEvent::Finished);
                                         break;
                                     }
-
                                     thread::sleep(Duration::from_millis(500));
                                 }
                             }

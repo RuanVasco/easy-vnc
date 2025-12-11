@@ -1,5 +1,5 @@
 #[derive(Debug, Clone)]
-pub enum Error {
+pub enum VncError {
     WaylandDetected,
     ConnectionRefused,
     Timeout,
@@ -7,7 +7,7 @@ pub enum Error {
     // Unknown(String),
 }
 
-impl Error {
+impl VncError {
     pub fn from_log(log: &str) -> Option<Self> {
         let log_lower = log.to_lowercase();
 

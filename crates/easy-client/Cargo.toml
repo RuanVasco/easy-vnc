@@ -7,12 +7,20 @@ license = "GPL-3.0-only"
 description = "Client module for Easy Remote (User side)."
 
 [dependencies]
+easy-core = { path = "../easy-core" }
+
 directories = "6.0.0"
-gtk4 = "=0.10.3"
-libadwaita = "0.8.1"
 async-channel = "2.5.0"
 quick-xml = { version = "0.38.4", features = ["serialize"]}
 serde = { version = "1.0.228", features = ["derive"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+gtk4 = "=0.10.3"
+libadwaita = "0.8.1"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+native-windows-gui = "1.0.13"
+native-windows-derive = "1.0.5"
 
 [package.metadata.deb]
 name = "easy-remote-client"
@@ -28,5 +36,5 @@ assets = [
 ]
 
 conf-files = [
-    "/etc/easy-remote/entries.xml"
+    "/etc/easy-remote/client/entries.xml"
 ]
