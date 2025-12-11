@@ -1,24 +1,39 @@
-use gtk4::prelude::*;
-use gtk4::{Application, ApplicationWindow, Label};
+mod service;
 
-fn main() {
-    let app = Application::builder()
-        .application_id("com.github.RuanVasco.easy-tech")
-        .build();
+use service::webrtc_viewer::WebRtcViewer;
+use std::io::{self, BufRead};
 
-    app.connect_activate(|app| {
-        let label = Label::new(Some("Painel do Técnico\n(Em Construção)"));
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let (tx, rx) = async_channel::unbounded();
+    let viewer = WebRtcViewer::new(tx).await?;
 
-        let window = ApplicationWindow::builder()
-            .application(app)
-            .title("Easy Remote - Técnico")
-            .default_width(600)
-            .default_height(400)
-            .child(&label)
-            .build();
+    let mut buffer = String::new();
+    let stdin = io::stdin();
+    let mut handle = stdin.lock();
 
-        window.present();
-    });
+    loop {
+        let mut line = String::new();
+        handle.read_line(&mut line)?;
+        if line.trim().is_empty() {
+            break;
+        }
+        buffer.push_str(&line);
+    }
 
-    app.run();
+    let answer = viewer.handle_offer(buffer).await?;
+
+    println!("\n-------------------------------------------------");
+    println!("2. Copie este SDP ANSWER e cole no Cliente:");
+    println!("-------------------------------------------------");
+    println!("{}", answer);
+    println!("-------------------------------------------------\n");
+
+    println!("Aguardando vídeo...");
+
+    while let Ok(frame_data) = rx.recv().await {
+        println!("Recebi frame JPEG! Tamanho: {} bytes", frame_data.len());
+    }
+
+    Ok(())
 }

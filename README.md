@@ -3,7 +3,7 @@
 ![Status](https://img.shields.io/badge/Status-Active-success)
 ![Language](https://img.shields.io/badge/Rust-2024-orange)
 ![GUI](https://img.shields.io/badge/GTK-4.0-blue)
-![License](https://img.shields.io/badge/License-GPLv3-green)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 **Easy Remote** is a simplified remote connection manager, developed in Rust with GTK4.
 

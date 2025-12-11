@@ -5,7 +5,7 @@ pkgrel=1
 pkgdesc="Open-source 'Single Click' remote support client for Linux."
 arch=('x86_64')
 url="https://github.com/RuanVasco/easy-remote"
-license=('GPL3')
+license=('MIT')
 depends=('gtk4' 'libadwaita' 'glib2' 'x11vnc' 'wayvnc')
 makedepends=('cargo' 'git')
 source=("git+https://github.com/RuanVasco/easy-remote.git#branch=main")
