@@ -119,8 +119,6 @@ impl WebRtcClient {
         &self,
         receiver: async_channel::Receiver<crate::service::capture::VideoFrame>,
     ) {
-        println!("Aguardando conexão WebRTC para iniciar streaming...");
-
         loop {
             let maybe_dc = {
                 let guard = self.data_channel.lock().await;
@@ -133,17 +131,10 @@ impl WebRtcClient {
                         let expected_size = (frame.width * frame.height * 4) as usize;
                         let received_size = frame.data.len();
 
-                        println!("--- DEBUG FRAME ---");
-                        println!("Dimensões: {}x{}", frame.width, frame.height);
-                        println!("Bytes Recebidos: {}", received_size);
-                        println!("Bytes Esperados (BGRA8): {}", expected_size);
-
                         if received_size < 16 {
                             eprintln!("ERRO: Buffer muito pequeno para ser inspecionado!");
                             continue;
                         }
-
-                        println!("Primeiros 16 bytes (Hex): {:?}", &frame.data[0..16]);
 
                         if received_size != expected_size {
                             eprintln!(
@@ -196,22 +187,7 @@ impl WebRtcClient {
                                 let mut payload = vec![flag];
                                 payload.extend_from_slice(chunk);
 
-                                let result = dc.send(&bytes::Bytes::from(payload)).await;
-
-                                match result {
-                                    Ok(_) => {
-                                        if i == 0 {
-                                            println!(
-                                                "Frame fragmentado ({} chunks) e ENVIADO!",
-                                                jpg_bytes.chunks(max_chunk_size).count()
-                                            );
-                                        }
-                                    }
-                                    Err(e) => {
-                                        eprintln!("ERRO FATAL AO ENVIAR CHUNK: {}", e);
-                                        break;
-                                    }
-                                }
+                                let _ = dc.send(&bytes::Bytes::from(payload)).await;
                             }
                         }
                     }

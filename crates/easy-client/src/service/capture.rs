@@ -21,11 +21,6 @@ impl ScreenCapture {
             });
 
             if let Some(monitor) = monitors.first() {
-                println!(
-                    "capturando monitor: {}",
-                    monitor.name().unwrap_or("Desconhecido".to_string())
-                );
-
                 let frame_duration = Duration::from_millis(33);
 
                 loop {

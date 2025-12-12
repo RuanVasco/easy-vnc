@@ -34,8 +34,6 @@ fn build_ui(app: &Application) {
     std::thread::spawn(move || {
         let rt = Runtime::new().unwrap();
         rt.block_on(async move {
-            println!("Iniciando WebRTC Backend...");
-
             let viewer = match WebRtcViewer::new(tx).await {
                 Ok(v) => v,
                 Err(e) => {
@@ -80,18 +78,45 @@ fn build_ui(app: &Application) {
     let picture_clone = picture.clone();
 
     glib::MainContext::default().spawn_local(async move {
-        println!("Interface Gráfica: Aguardando vídeo...");
+        println!("Interface Gráfica: Loop de vídeo iniciado!");
+        let mut frame_count = 0;
 
-        while let Ok(frame_data) = rx.recv().await {
-            let stream = Cursor::new(frame_data);
+        loop {
+            let match_result = rx.recv().await;
 
-            match gdk_pixbuf::Pixbuf::from_read(stream) {
-                Ok(pixbuf) => {
-                    let texture = gdk4::Texture::for_pixbuf(&pixbuf);
-                    picture_clone.set_paintable(Some(&texture));
+            match match_result {
+                Ok(mut frame_data) => {
+                    let mut dropped = 0;
+                    while !rx.is_empty() {
+                        if let Ok(newer_frame) = rx.try_recv() {
+                            frame_data = newer_frame;
+                            dropped += 1;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if dropped > 0 {
+                        println!("Skipped {} old frames to catch up", dropped);
+                    }
+
+                    let stream = Cursor::new(frame_data);
+                    match gdk_pixbuf::Pixbuf::from_read(stream) {
+                        Ok(pixbuf) => {
+                            let texture = gdk4::Texture::for_pixbuf(&pixbuf);
+                            picture_clone.set_paintable(Some(&texture));
+
+                            frame_count += 1;
+                            if frame_count % 30 == 0 {
+                                println!("Renderizando frame #{}", frame_count);
+                            }
+                        }
+                        Err(e) => eprintln!("Erro JPEG: {}", e),
+                    }
                 }
-                Err(e) => {
-                    eprintln!("Drop frame: {}", e);
+                Err(_) => {
+                    println!("Canal fechado. Encerrando vídeo.");
+                    break;
                 }
             }
         }

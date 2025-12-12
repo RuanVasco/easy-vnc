@@ -52,11 +52,9 @@ impl AppLayout {
                     let rt = tokio::runtime::Runtime::new().unwrap();
 
                     rt.block_on(async {
-                        println!("\n=== INICIANDO CONEXÃO WEBRTC (MODO MANUAL) ===");
                         let (tx, rx) = async_channel::unbounded();
 
                         ScreenCapture::start(tx);
-                        println!("Captura de tela iniciada.");
 
                         let client = match WebRtcClient::new().await {
                             Ok(c) => c,
@@ -86,10 +84,8 @@ impl AppLayout {
                             buffer.push_str(&line);
                         }
 
-                        println!("Processando resposta...");
                         client.handle_answer(buffer).await.unwrap();
 
-                        println!("Conexão estabelecida! Iniciando envio de vídeo...");
                         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
                         
                         client.start_streaming(rx).await;
