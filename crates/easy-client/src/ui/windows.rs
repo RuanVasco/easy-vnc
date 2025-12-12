@@ -90,6 +90,7 @@ impl AppLayout {
                         client.handle_answer(buffer).await.unwrap();
 
                         println!("Conexão estabelecida! Iniciando envio de vídeo...");
+                        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
                         
                         client.start_streaming(rx).await;
                     })

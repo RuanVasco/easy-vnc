@@ -50,17 +50,41 @@ impl WebRtcViewer {
             ..Default::default()
         };
 
+        let frame_buffer_ref = Arc::new(Mutex::new(Vec::<u8>::new()));
+
         let peer_connection = api.new_peer_connection(config).await?;
 
         peer_connection.on_data_channel(Box::new(move |d: Arc<RTCDataChannel>| {
             let sender_clone = frame_sender.clone();
+            let frame_buffer_clone = frame_buffer_ref.clone();
+
             d.on_message(Box::new(move |msg| {
-                let data = msg.data.to_vec();
+                let sender_for_async = sender_clone.clone();
+                let buffer_for_async = frame_buffer_clone.clone();
 
-                println!("🚀 Dados recebidos! Tamanho: {} bytes", data.len());
+                Box::pin(async move {
+                    let data = msg.data.to_vec();
+                    let is_last_chunk = data[0] == 1u8;
+                    let chunk_data = &data[1..];
 
-                let _ = sender_clone.send_blocking(data);
-                Box::pin(async {})
+                    let mut buffer_guard = buffer_for_async.lock().await;
+                    buffer_guard.extend_from_slice(chunk_data);
+
+                    if is_last_chunk {
+                        println!(
+                            "🚀 FRAME REMONTADO! Tamanho Total: {} bytes",
+                            buffer_guard.len()
+                        );
+                        let full_frame = buffer_guard.drain(..).collect::<Vec<u8>>();
+
+                        let _ = sender_for_async.send_blocking(full_frame);
+                    } else {
+                        println!(
+                            "Recebendo fragmento... buffer: {} bytes",
+                            buffer_guard.len()
+                        );
+                    }
+                })
             }));
             Box::pin(async {})
         }));

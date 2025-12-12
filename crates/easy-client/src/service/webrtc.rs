@@ -130,27 +130,89 @@ impl WebRtcClient {
             if let Some(dc) = maybe_dc {
                 if dc.ready_state() == RTCDataChannelState::Open {
                     if let Ok(frame) = receiver.recv().await {
-                        let jpg_bytes = tokio::task::spawn_blocking(move || {
-                            let mut buffer = Vec::new();
-                            let mut cursor = std::io::Cursor::new(&mut buffer);
-                            let mut encoder = JpegEncoder::new_with_quality(&mut cursor, 60);
+                        let expected_size = (frame.width * frame.height * 4) as usize;
+                        let received_size = frame.data.len();
 
-                            let _ = encoder.encode(
-                                &frame.data,
-                                frame.width,
-                                frame.height,
-                                image::ExtendedColorType::Rgba8,
+                        println!("--- DEBUG FRAME ---");
+                        println!("Dimensões: {}x{}", frame.width, frame.height);
+                        println!("Bytes Recebidos: {}", received_size);
+                        println!("Bytes Esperados (BGRA8): {}", expected_size);
+
+                        if received_size < 16 {
+                            eprintln!("ERRO: Buffer muito pequeno para ser inspecionado!");
+                            continue;
+                        }
+
+                        println!("Primeiros 16 bytes (Hex): {:?}", &frame.data[0..16]);
+
+                        if received_size != expected_size {
+                            eprintln!(
+                                "AVISO: TAMANHO DE BUFFER INCORRETO. Esperado: {}, Recebido: {}",
+                                expected_size, received_size
                             );
+                            continue;
+                        }
 
-                            buffer
-                        })
+                        let jpg_bytes = tokio::task::spawn_blocking(
+                            move || -> Result<Vec<u8>, image::ImageError> {
+                                let mut buffer = Vec::new();
+                                let mut cursor = std::io::Cursor::new(&mut buffer);
+                                let mut encoder = JpegEncoder::new_with_quality(&mut cursor, 60);
+
+                                let raw_img = image::RgbaImage::from_raw(
+                                    frame.width,
+                                    frame.height,
+                                    frame.data,
+                                )
+                                .expect("Falha na criação da imagem crua. Buffer inválido.");
+
+                                let rgb_img = image::DynamicImage::ImageRgba8(raw_img).to_rgb8();
+
+                                encoder.encode(
+                                    &rgb_img,
+                                    rgb_img.width(),
+                                    rgb_img.height(),
+                                    image::ExtendedColorType::Rgb8,
+                                )?;
+
+                                Ok(buffer)
+                            },
+                        )
                         .await
+                        .unwrap_or_else(|e| {
+                            eprintln!("Erro na compressão JPEG: {}", e);
+                            Ok(Vec::new())
+                        })
                         .unwrap_or_default();
 
-                        if !jpg_bytes.is_empty()
-                            && let Err(e) = dc.send(&bytes::Bytes::from(jpg_bytes)).await
-                        {
-                            eprintln!("Erro ao enviar frame: {}", e);
+                        if !jpg_bytes.is_empty() {
+                            let max_chunk_size = 16384;
+
+                            for (i, chunk) in jpg_bytes.chunks(max_chunk_size).enumerate() {
+                                let is_last_chunk =
+                                    i == jpg_bytes.chunks(max_chunk_size).count() - 1;
+
+                                let flag = if is_last_chunk { 1u8 } else { 0u8 };
+                                let mut payload = vec![flag];
+                                payload.extend_from_slice(chunk);
+
+                                let result = dc.send(&bytes::Bytes::from(payload)).await;
+
+                                match result {
+                                    Ok(_) => {
+                                        if i == 0 {
+                                            println!(
+                                                "Frame fragmentado ({} chunks) e ENVIADO!",
+                                                jpg_bytes.chunks(max_chunk_size).count()
+                                            );
+                                        }
+                                    }
+                                    Err(e) => {
+                                        eprintln!("ERRO FATAL AO ENVIAR CHUNK: {}", e);
+                                        break;
+                                    }
+                                }
+                            }
                         }
                     }
                 } else {
