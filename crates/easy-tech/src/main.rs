@@ -1,7 +1,8 @@
 mod service;
 
 use service::webrtc_viewer::WebRtcViewer;
-use std::io::{self, BufRead};
+use std::io::{self, BufRead, Cursor};
+use tokio::runtime::Runtime;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -36,4 +37,63 @@ async fn main() -> anyhow::Result<()> {
     }
 
     Ok(())
+}
+
+fn build_ui(app: &Application) {
+    let window = ApplicationWindow::builder()
+        .application(app)
+        .title("Easy Remote - Técnico (Viewer)")
+        .default_width(800)
+        .default_height(600)
+        .build();
+
+    let picture = Picture::new();
+    picture.set_content_fit(gtk4::ContentFit::Contain);
+    window.set_child(Some(&picture));
+
+    let (tx, rx) = async_channel::unbounded();
+
+    std::thread::spawn(move || {
+        let rt = Runtime::new().unwrap();
+        rt.block_on(async move {
+            println!("Iniciando WebRTC...");
+
+            let viewer = match WebRtcViewer::new(tx).await {
+                Ok(v) => v,
+                Err(e) => {
+                    eprintln!("Erro ao criar viewer: {}", e);
+                    return;
+                }
+            };
+
+            println!("\n--- MODO MANUAL ---");
+            println!("Cole o OFFER do Windows aqui e dê ENTER duas vezes:");
+
+            loop {
+                tokio::time::sleep(tokio::time::Duration::from_secs(3600)).await;
+            }
+        });
+    });
+
+    let picture_clone = picture.clone();
+
+    glib::MainContext::default().spawn_local(async move {
+        println!("Aguardando frames de vídeo...");
+
+        while let Ok(frame_data) = rx.recv().await {
+            let stream = Cursor::new(frame_data);
+
+            match gdk_pixbuf::Pixbuf::from_read(stream) {
+                Ok(pixbuf) => {
+                    let texture = gdk::Texture::for_pixbuf(&pixbuf);
+                    picture_clone.set_paintable(Some(&texture));
+                }
+                Err(e) => {
+                    eprintln!("Erro ao decodificar frame JPEG: {}", e);
+                }
+            }
+        }
+    });
+
+    window.present();
 }
