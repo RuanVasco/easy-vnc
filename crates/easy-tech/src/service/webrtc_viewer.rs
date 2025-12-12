@@ -1,11 +1,7 @@
 use anyhow::Result;
-use std::net::SocketAddr;
 use std::sync::Arc;
-use tokio::net::UdpSocket;
 use tokio::sync::Mutex;
 use webrtc::data_channel::RTCDataChannel;
-use webrtc::ice::udp_mux::{UDPMux, UDPMuxDefault, UDPMuxParams};
-use webrtc::ice::udp_network::UDPNetwork;
 use webrtc::ice_transport::ice_gatherer_state::RTCIceGathererState;
 use webrtc::peer_connection::sdp::sdp_type::RTCSdpType;
 use webrtc::peer_connection::sdp::session_description::RTCSessionDescription;
@@ -38,19 +34,7 @@ impl WebRtcViewer {
         }));
 
         let my_ip = local_ip()?;
-        let addr: SocketAddr = format!("{}:0", my_ip).parse()?;
-        let udp_socket = UdpSocket::bind(addr).await?;
 
-        println!(
-            "🔧 [CLIENT] Socket aberto na porta: {}",
-            udp_socket.local_addr()?.port()
-        );
-
-        let mux_params = UDPMuxParams::new(udp_socket);
-        let mux = UDPMuxDefault::new(mux_params);
-
-        let network_option = UDPNetwork::Muxed(mux as Arc<dyn UDPMux + Send + Sync>);
-        setting_engine.set_udp_network(network_option);
         setting_engine.set_nat_1to1_ips(vec![my_ip.to_string()], RTCIceCandidateType::Host);
 
         let registry = register_default_interceptors(Registry::new(), &mut media_engine)?;
@@ -69,19 +53,15 @@ impl WebRtcViewer {
         let peer_connection = api.new_peer_connection(config).await?;
 
         peer_connection.on_data_channel(Box::new(move |d: Arc<RTCDataChannel>| {
-            println!("Canal de dados aberto: {}", d.label());
-
             let sender_clone = frame_sender.clone();
-
             d.on_message(Box::new(move |msg| {
                 let data = msg.data.to_vec();
-                if let Err(e) = sender_clone.send_blocking(data) {
-                    eprintln!("Erro ao encaminhar frame para UI: {}", e);
-                }
 
+                println!("🚀 Dados recebidos! Tamanho: {} bytes", data.len());
+
+                let _ = sender_clone.send_blocking(data);
                 Box::pin(async {})
             }));
-
             Box::pin(async {})
         }));
 

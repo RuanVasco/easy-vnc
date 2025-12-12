@@ -43,7 +43,7 @@ impl AppLayout {
             let data = self.data.borrow();
             if let Some(conn) = data.get(index) {
                 self.status_label
-                    .set_text(&"Handshake manual iniciada... Olhe o Terminal!".to_string());
+                    .set_text("Handshake manual iniciada... Olhe o Terminal!");
                 self.connect_btn.set_enabled(false);
 
                 let _target_ip = conn.ip.clone();
@@ -97,7 +97,7 @@ impl AppLayout {
             }
         }
 
-        let (tx, rx) = async_channel::unbounded();
+        let (tx, _rx) = async_channel::unbounded();
 
         crate::service::capture::ScreenCapture::start(tx);        
     }

@@ -1,29 +1,19 @@
 use anyhow::Result;
 use image::codecs::jpeg::JpegEncoder;
-use std::{
-    net::SocketAddr,
-    sync::{Arc, Weak},
-};
-use tokio::{net::UdpSocket, sync::Mutex};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 use webrtc::{
     api::{
         APIBuilder, interceptor_registry::register_default_interceptors, media_engine::MediaEngine,
     },
     data_channel::{RTCDataChannel, data_channel_state::RTCDataChannelState},
-    ice::{
-        udp_mux::{
-            UDPMux, UDPMuxConn, UDPMuxConnParams, UDPMuxDefault, UDPMuxParams, UDPMuxWriter,
-        },
-        udp_network::UDPNetwork,
-    },
     peer_connection::{
         RTCPeerConnection,
         configuration::RTCConfiguration,
         peer_connection_state::RTCPeerConnectionState,
         sdp::{sdp_type::RTCSdpType, session_description::RTCSessionDescription},
     },
-    util::{Conn, conn::conn_udp_listener::UdpConn},
 };
 
 use local_ip_address::local_ip;
@@ -44,14 +34,6 @@ impl WebRtcClient {
         let mut setting_engine = SettingEngine::default();
 
         let my_ip = local_ip()?;
-        let addr: SocketAddr = format!("{}:0", my_ip).parse()?;
-        let udp_socket = UdpSocket::bind(addr).await?;
-        let local_port = udp_socket.local_addr()?.port();
-
-        let mux = UDPMuxDefault::new(mux_params);
-        let network_option = UDPNetwork::Muxed(mux as Arc<dyn UDPMux + Send + Sync>);
-
-        setting_engine.set_udp_network(network_option);
 
         setting_engine.set_nat_1to1_ips(vec![my_ip.to_string()], RTCIceCandidateType::Host);
 
