@@ -1,7 +1,10 @@
 mod service;
 
+use gtk4::prelude::*;
+use gtk4::{Application, ApplicationWindow, Picture};
 use service::webrtc_viewer::WebRtcViewer;
 use std::io::{self, BufRead, Cursor};
+use std::sync::Arc;
 use tokio::runtime::Runtime;
 
 #[tokio::main]
