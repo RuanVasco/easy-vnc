@@ -1,14 +1,12 @@
 mod service;
 
-use gdk_pixbuf;
-use gdk4;
-use glib;
 use gtk4::prelude::*;
 use gtk4::{Application, ApplicationWindow, Picture};
 use service::webrtc_viewer::WebRtcViewer;
 use std::io::{self, BufRead, Cursor};
-use std::sync::Arc;
 use tokio::runtime::Runtime;
+
+const APP_ID: &str = "com.github.RuanVasco.easy-remote.tech";
 
 #[tokio::main]
 async fn main() {
